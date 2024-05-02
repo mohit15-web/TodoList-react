@@ -1,6 +1,8 @@
 import React, { useState , useEffect } from "react";
 import { motion } from "framer-motion";
 import AuroraBackground from "./background";
+import { toast } from "react-toastify";
+
 
 function TodoList() {
   const [inputText, setInputText] = useState("");
@@ -18,8 +20,17 @@ function TodoList() {
   const handleAddTask = () => {
     if (inputText.trim() !== "") {
       setTasks([...tasks, { subject: inputText, number: parseInt(numberInput) }]);
+      toast.success("Subject Added", {
+        position: "top-center",
+        theme: "colored",
+      });
       setInputText("");
       setNumberInput(""); // Reset number input after adding task
+    }{
+      toast.error("Please Enter Subject name", {
+        position: "top-center",
+        theme: "colored",
+      });
     }
   };
 
@@ -53,6 +64,10 @@ function TodoList() {
   const handleDelete = (index) => {
     let updatedTask = tasks.filter((task, idx) => idx !== index);
     setTasks(updatedTask);
+    toast.success("Subject Deleted", {
+      position: "top-center",
+      theme: "colored",
+    });
   };
 
   return (
