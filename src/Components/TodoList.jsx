@@ -1,13 +1,15 @@
-import React, { useState , useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import AuroraBackground from "./background";
 import { toast } from "react-toastify";
-
 
 function TodoList() {
   const [inputText, setInputText] = useState("");
   const [numberInput, setNumberInput] = useState("");
   const [tasks, setTasks] = useState([]);
+  const [editIndex, setEditIndex] = useState(null);
+const [editInput, setEditInput] = useState("");
+
 
   const handleInput = (e) => {
     setInputText(e.target.value);
@@ -19,14 +21,17 @@ function TodoList() {
 
   const handleAddTask = () => {
     if (inputText.trim() !== "") {
-      setTasks([...tasks, { subject: inputText, number: parseInt(numberInput) }]);
+      setTasks([
+        ...tasks,
+        { subject: inputText, number: parseInt(numberInput) },
+      ]);
       toast.success("Subject Added", {
         position: "top-center",
         theme: "colored",
       });
       setInputText("");
       setNumberInput(""); // Reset number input after adding task
-    }{
+    } else {
       toast.error("Please Enter Subject name", {
         position: "top-center",
         theme: "colored",
@@ -39,27 +44,25 @@ function TodoList() {
     updatedTasks[index].number += 1;
     setTasks(updatedTasks);
   };
-  
+
   const decrement = (index) => {
     const updatedTasks = [...tasks];
-    if(updatedTasks[index].number > 0){
+    if (updatedTasks[index].number > 0) {
       updatedTasks[index].number -= 1;
       setTasks(updatedTasks);
     }
   };
 
   useEffect(() => {
-    const storedTasks = localStorage.getItem('tasks');
+    const storedTasks = localStorage.getItem("tasks");
     if (storedTasks) {
       setTasks(JSON.parse(storedTasks));
     }
-  },[]);
+  }, []);
 
   useEffect(() => {
-    localStorage.setItem('tasks', JSON.stringify(tasks));
+    localStorage.setItem("tasks", JSON.stringify(tasks));
   }, [tasks]);
-
-
 
   const handleDelete = (index) => {
     let updatedTask = tasks.filter((task, idx) => idx !== index);
@@ -70,6 +73,23 @@ function TodoList() {
     });
   };
 
+  const handleEdit = (index) => {
+    setEditIndex(index);
+    setEditInput(tasks[index].subject);
+  };
+  
+  const handleEditInputChange = (e) => {
+    setEditInput(e.target.value);
+  };
+  
+  const handleEditSave = (index) => {
+    const updatedTasks = [...tasks];
+    updatedTasks[index].subject = editInput;
+    setTasks(updatedTasks);
+    setEditIndex(null);
+    localStorage.setItem("tasks", JSON.stringify(updatedTasks));
+  };
+  
   return (
     <AuroraBackground>
       <motion.div
@@ -92,7 +112,7 @@ function TodoList() {
               value={inputText}
               onChange={handleInput}
               placeholder="Subject"
-              className="border border-gray-200 text-xl p-2 text-black"
+              className="border border-gray-200 text-xl p-2 text-black w-96"
             />
             <input
               type="number"
@@ -110,19 +130,44 @@ function TodoList() {
           </div>
           <ul>
             {tasks.map((task, index) => (
-               <li key={index} className="text-black py-2 px-4 font-bold my-4">
-               {task.subject} {" - "} {task.number} {"Hour"}
-               <button className="ml-[14rem] bg-green-500 p-2" onClick={() => increment(index)}>
-                 +
-               </button>
-               <button className="ml-[1rem] bg-red-500 p-2" onClick={() => decrement(index)}>
-                 -
-               </button>
-               <button className="ml-[1rem]  p-2" onClick={() => handleDelete(index)}>
-                 ❌
-               </button>
-
-             </li>
+              <li
+                key={index}
+                className="text-black font-bold border flex justify-between py-2 my-3 px-3"
+              >
+                {editIndex === index ? (
+                  <>
+                    <input
+                      type="text"
+                      value={editInput}
+                      onChange={handleEditInputChange}
+                      className="border border-gray-200 text-xl p-2 text-black"
+                    />
+                    <button onClick={() => handleEditSave(index)}>Save</button>
+                  </>
+                ) : (
+                  <>
+                    <h1>
+                      {task.subject} - {task.number} Hour
+                    </h1>
+                    <div className="flex gap-4">
+                      <button onClick={() => handleEdit(index)}>Edit</button>
+                      {/* Other buttons */}
+                    </div>
+                  </>
+                )}
+                <div className="flex gap-4">
+                  <button
+                    className="text-2xl "
+                    onClick={() => increment(index)}
+                  >
+                    +
+                  </button>
+                  <button className="text-3xl" onClick={() => decrement(index)}>
+                    -
+                  </button>
+                  <button onClick={() => handleDelete(index)}>❌</button>
+                </div>
+              </li>
             ))}
           </ul>
         </div>
